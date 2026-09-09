@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Clínica Fisioterapia</title>
+
+<style>
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #f4f6f9;
+}
+
+header {
+    background: #1976d2;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.container {
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+input, textarea, button {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+button {
+    background: #1976d2;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #125aa0;
+}
+
+#app {
+    display: none;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <h2>Sistema de Prontuário - Clínica de Fisioterapia</h2>
+</header>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div class="card" id="loginBox">
+    <h3>Login</h3>
+
+    <input id="email" placeholder="Email">
+    <input id="senha" type="password" placeholder="Senha">
+
+    <button onclick="login()">Entrar</button>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+    <div class="card">
+        <button onclick="mostrarCadastro()">Novo Paciente</button>
+        <button onclick="mostrarLista()">Listar Pacientes</button>
+    </div>
+
+    <!-- PACIENTE SELECIONADO -->
+    <div class="card">
+        <h3>Paciente Selecionado</h3>
+
+        <input id="pacienteSelecionadoId" placeholder="Digite o ID do paciente">
+        <button onclick="selecionarPaciente()">Selecionar</button>
+
+        <p id="pacienteAtual">Nenhum paciente selecionado</p>
+
+        <hr>
+
+        <div id="dadosPaciente">
+            <b>Dados clínicos aparecerão aqui</b>
+        </div>
+    </div>
+
+    <!-- LISTA -->
+    <div class="card">
+        <h3>Pacientes</h3>
+        <div id="listaPacientes"></div>
+    </div>
+
+    <!-- CADASTRO -->
+    <div class="card" id="cadastro">
+        <h3>Cadastro de Paciente</h3>
+
+        <input id="nome" placeholder="Nome">
+        <input id="idade" placeholder="Idade">
+        <input id="diagnostico" placeholder="Diagnóstico">
+
+        <textarea id="queixa" placeholder="Queixa Principal"></textarea>
+        <textarea id="objetivos" placeholder="Objetivos"></textarea>
+        <textarea id="condutas" placeholder="Condutas"></textarea>
+
+        <button onclick="salvarPaciente()">Salvar Paciente</button>
+    </div>
+
+</div>
+
+<script>
+let pacienteAtualId = null;
+
+function login() {
+
+    let email = document.getElementById("email").value;
+    let senha = document.getElementById("senha").value;
+
+    fetch("http://localhost:8080/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ email, senha })
+    })
+    .then(res => res.text())
+    .then(res => {
+
+        if (res === "OK") {
+            alert("Login realizado!");
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("app").style.display = "block";
+            listarPacientes();
+        } else {
+            alert("Login inválido");
+        }
+
+    });
+}
+
+function salvarPaciente() {
+
+    let paciente = {
+        nome: document.getElementById("nome").value,
+        idade: document.getElementById("idade").value,
+        diagnostico: document.getElementById("diagnostico").value,
+        queixaPrincipal: document.getElementById("queixa").value,
+        objetivos: document.getElementById("objetivos").value,
+        condutas: document.getElementById("condutas").value
+    };
+
+    fetch("http://localhost:8080/paciente", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(paciente)
+    })
+    .then(res => res.text())
+    .then(res => {
+        alert("Paciente salvo!");
+        listarPacientes();
+    });
+}
+
+function listarPacientes() {
+
+    fetch("http://localhost:8080/paciente")
+    .then(res => res.json())
+    .then(data => {
+
+        let lista = document.getElementById("listaPacientes");
+        lista.innerHTML = "";
+
+        data.forEach(p => {
+
+            lista.innerHTML += `
+                <div class="card">
+                    <b>${p.nome}</b><br>
+                    ID: ${p.id}<br>
+                    ${p.idade} anos - ${p.diagnostico}<br><br>
+
+                    <button onclick="selecionarPacienteLista(${p.id})">
+                        Selecionar
+                    </button>
+                </div>
+            `;
+        });
+    });
+}
+
+function selecionarPaciente() {
+
+    let id = document.getElementById("pacienteSelecionadoId").value;
+
+    selecionarPorId(id);
+}
+
+function selecionarPacienteLista(id) {
+    selecionarPorId(id);
+}
+
+function selecionarPorId(id) {
+
+    pacienteAtualId = id;
+
+    document.getElementById("pacienteAtual").innerText =
+        "Paciente selecionado ID: " + id;
+
+    fetch("http://localhost:8080/paciente?id=" + id)
+    .then(res => res.json())
+    .then(p => {
+
+        document.getElementById("dadosPaciente").innerHTML = `
+            <b>Nome:</b> ${p.nome}<br><br>
+            <b>Queixa:</b> ${p.queixaPrincipal}<br><br>
+            <b>Objetivos:</b> ${p.objetivos}<br><br>
+            <b>Condutas:</b> ${p.condutas}
+        `;
+    });
+}
+
+function mostrarCadastro() {
+    document.getElementById("cadastro").scrollIntoView({behavior:"smooth"});
+}
+
+function mostrarLista() {
+    listarPacientes();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+bin/
+.vscode/
+.env
+*.class
+target/
+out/
+.idea/
