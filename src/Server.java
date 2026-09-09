@@ -262,23 +262,42 @@ public class Server {
     // =========================
     // RESPOSTA JSON
     // =========================
+    // 
+    
     private static void sendResponse(
-            HttpExchange exchange,
-            String response
-    ) throws IOException {
+        HttpExchange exchange,
+        String response
+) throws IOException {
 
-        byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+    byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
 
-        exchange.getResponseHeaders().set(
-                "Content-Type",
-                "application/json; charset=UTF-8"
-        );
+    // =========================
+    // CORS
+    // =========================
+    exchange.getResponseHeaders().set(
+            "Access-Control-Allow-Origin",
+            "*"
+    );
 
-        exchange.sendResponseHeaders(200, bytes.length);
+    exchange.getResponseHeaders().set(
+            "Access-Control-Allow-Methods",
+            "GET, POST, OPTIONS"
+    );
 
-        try (OutputStream os = exchange.getResponseBody()) {
+    exchange.getResponseHeaders().set(
+            "Access-Control-Allow-Headers",
+            "Content-Type"
+    );
 
-            os.write(bytes);
-        }
+    exchange.getResponseHeaders().set(
+            "Content-Type",
+            "application/json; charset=UTF-8"
+    );
+
+    exchange.sendResponseHeaders(200, bytes.length);
+
+    try (OutputStream os = exchange.getResponseBody()) {
+        os.write(bytes);
     }
+}
 }
