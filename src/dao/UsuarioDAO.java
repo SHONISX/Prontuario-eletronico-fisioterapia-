@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import model.Usuario;
 
 public class UsuarioDAO {
@@ -15,7 +14,7 @@ public class UsuarioDAO {
 
     public boolean login(String email, String senha) {
 
-        String sql = "SELECT * FROM Usuarios WHERE email = ? AND senha = ?";
+        String sql = "SELECT * FROM usuarios WHERE email = ? AND senha = ?";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -42,7 +41,7 @@ public class UsuarioDAO {
 
     public boolean cadastrar(Usuario usuario) {
 
-        String sql = "INSERT INTO Usuarios(nome, email, senha, tipo) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO usuarios(nome, email, senha, tipo) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
