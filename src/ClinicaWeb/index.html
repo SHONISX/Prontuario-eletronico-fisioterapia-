@@ -81,7 +81,7 @@ button:hover {
     </div>
 
     <!-- CADASTRO DE COLABORADOR -->
-<div class="card">
+<div class="card" id="cadastroColaborador">
     <h3>Cadastrar Colaborador</h3>
 
     <input id="usuarioNome" placeholder="Nome do colaborador">
@@ -125,6 +125,33 @@ button:hover {
         </div>
     </div>
 
+    <!-- PRONTUÁRIO / EVOLUÇÕES -->
+<div class="card" id="prontuarioBox" style="display:none;">
+
+    <h3>Prontuário</h3>
+
+    <h4>Nova Evolução</h4>
+
+    <textarea
+        id="evolucaoDescricao"
+        placeholder="Descreva a evolução do paciente..."
+        rows="5"
+    ></textarea>
+
+    <button onclick="salvarEvolucao()">
+        Salvar Evolução
+    </button>
+
+    <hr>
+
+    <h3>Histórico de Evoluções</h3>
+
+    <div id="listaEvolucoes">
+        Nenhuma evolução registrada.
+    </div>
+
+</div>
+
     <!-- LISTA -->
     <div class="card">
         <h3>Pacientes</h3>
@@ -151,6 +178,71 @@ button:hover {
 <script>
 let pacienteAtualId = null;
 
+let usuarioAtualId = null;
+let usuarioAtualNome = null;
+let usuarioAtualTipo = null;
+
+function salvarEvolucao() {
+
+    if (pacienteAtualId === null) {
+        alert("Selecione um paciente.");
+        return;
+    }
+
+    let descricao =
+        document.getElementById(
+            "evolucaoDescricao"
+        ).value.trim();
+
+    if (descricao === "") {
+        alert("Digite a evolução.");
+        return;
+    }
+
+    let evolucao = {
+
+        idPaciente: String(pacienteAtualId),
+
+        idUsuario: String(usuarioAtualId),
+
+        descricao: descricao
+    };
+
+    fetch(
+        "https://prontuario-eletronico-fisioterapia-production.up.railway.app/evolucao",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(evolucao)
+        }
+    )
+    .then(res => res.text())
+    .then(res => {
+
+        if (res === "OK") {
+
+            alert("Evolução salva com sucesso!");
+
+            document.getElementById(
+                "evolucaoDescricao"
+            ).value = "";
+
+            listarEvolucoes();
+
+        } else {
+
+            alert(
+                "Erro ao salvar evolução: " +
+                res
+            );
+        }
+    });
+}
+
 function login() {
 
     let email = document.getElementById("email").value;
@@ -158,22 +250,276 @@ function login() {
 
     fetch("https://prontuario-eletronico-fisioterapia-production.up.railway.app/login", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({ email, senha })
     })
+    .then(res => res.json())
+    .then(res => {
+
+        if (res.status === "OK") {
+
+            usuarioAtualId = res.id;
+            usuarioAtualNome = res.nome;
+            usuarioAtualTipo = res.tipo;
+
+            alert(
+                "Bem-vindo, " +
+                usuarioAtualNome +
+                "!\nPerfil: " +
+                usuarioAtualTipo
+            );
+
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("app").style.display = "block";
+
+            aplicarPermissoes();
+
+            listarPacientes();
+
+        } else {
+
+            alert("Login inválido");
+        }
+    })
+    .catch(error => {
+
+        console.error(error);
+        alert("Erro ao realizar login.");
+    });
+}
+
+function listarEvolucoes() {
+
+    fetch(
+        "https://prontuario-eletronico-fisioterapia-production.up.railway.app/evolucao?idPaciente="
+        + pacienteAtualId
+    )
+    .then(res => res.json())
+    .then(data => {
+
+        let lista =
+            document.getElementById(
+                "listaEvolucoes"
+            );
+
+        lista.innerHTML = "";
+
+        if (data.length === 0) {
+
+            lista.innerHTML =
+                "<p>Nenhuma evolução registrada.</p>";
+
+            return;
+        }
+
+        data.forEach(e => {
+
+            let dataFormatada =
+                formatarData(e.data);
+
+            lista.innerHTML += `
+                <div class="card">
+
+                    <b>${escapeHtml(e.nomeUsuario)}</b>
+                    <br>
+
+                    <small>
+                        ${dataFormatada}
+                    </small>
+
+                    <hr>
+
+                    <p>
+                        ${escapeHtml(e.descricao)}
+                    </p>
+
+                    <hr>
+
+                    <b>Comentários</b>
+
+                    <div
+                        id="comentarios-${e.idEvolucao}">
+                        Carregando...
+                    </div>
+
+                    <textarea
+                        id="novoComentario-${e.idEvolucao}"
+                        placeholder="Adicionar comentário..."
+                    ></textarea>
+
+                    <button
+                        onclick="adicionarComentario(${e.idEvolucao})">
+                        Adicionar Comentário
+                    </button>
+
+                </div>
+            `;
+
+            listarComentarios(
+                e.idEvolucao
+            );
+        });
+    });
+}
+
+function adicionarComentario(idEvolucao) {
+
+    let campo =
+        document.getElementById(
+            "novoComentario-" + idEvolucao
+        );
+
+    let texto = campo.value.trim();
+
+    if (texto === "") {
+
+        alert("Digite um comentário.");
+        return;
+    }
+
+    let comentario = {
+
+        idEvolucao:
+            String(idEvolucao),
+
+        idUsuario:
+            String(usuarioAtualId),
+
+        comentario:
+            texto
+    };
+
+    fetch(
+        "https://prontuario-eletronico-fisioterapia-production.up.railway.app/comentario",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body:
+                JSON.stringify(comentario)
+        }
+    )
     .then(res => res.text())
     .then(res => {
 
         if (res === "OK") {
-            alert("Login realizado!");
-            document.getElementById("loginBox").style.display = "none";
-            document.getElementById("app").style.display = "block";
-            listarPacientes();
+
+            campo.value = "";
+
+            listarComentarios(
+                idEvolucao
+            );
+
         } else {
-            alert("Login inválido");
+
+            alert(
+                "Erro ao adicionar comentário: "
+                + res
+            );
+        }
+    });
+}
+
+function listarComentarios(idEvolucao) {
+
+    fetch(
+        "https://prontuario-eletronico-fisioterapia-production.up.railway.app/comentario?idEvolucao="
+        + idEvolucao
+    )
+    .then(res => res.json())
+    .then(data => {
+
+        let area =
+            document.getElementById(
+                "comentarios-" +
+                idEvolucao
+            );
+
+        area.innerHTML = "";
+
+        if (data.length === 0) {
+
+            area.innerHTML =
+                "<p><small>Nenhum comentário.</small></p>";
+
+            return;
         }
 
+        data.forEach(c => {
+
+            area.innerHTML += `
+                <div
+                    style="
+                        background:#f4f6f9;
+                        padding:10px;
+                        margin:8px 0;
+                        border-radius:6px;
+                    "
+                >
+
+                    <b>
+                        ${escapeHtml(c.nomeUsuario)}
+                    </b>
+
+                    <small>
+                        - ${formatarData(c.data)}
+                    </small>
+
+                    <br><br>
+
+                    ${escapeHtml(c.comentario)}
+
+                </div>
+            `;
+        });
     });
+}
+
+
+function formatarData(data) {
+
+    if (!data) {
+        return "";
+    }
+
+    let d = new Date(data);
+
+    return d.toLocaleString(
+        "pt-BR"
+    );
+}
+
+function escapeHtml(texto) {
+
+    if (!texto) {
+        return "";
+    }
+
+    return String(texto)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function aplicarPermissoes() {
+
+    if (usuarioAtualTipo === "Aluno") {
+
+        document.getElementById("cadastroColaborador").style.display = "none";
+
+    } else {
+
+        document.getElementById("cadastroColaborador").style.display = "block";
+    }
 }
 
 function cadastrarColaborador() {
@@ -305,6 +651,10 @@ function selecionarPorId(id) {
             <b>Objetivos:</b> ${p.objetivos}<br><br>
             <b>Condutas:</b> ${p.condutas}
         `;
+
+        document.getElementById("prontuarioBox").style.display = "block";
+
+    listarEvolucoes();
     });
 }
 

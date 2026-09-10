@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import model.Comentario;
 
 public class ComentarioDAO {
@@ -36,6 +38,71 @@ public class ComentarioDAO {
         }
 
     }
+
+    // ==========================
+// LISTAR COMENTÁRIOS DA EVOLUÇÃO
+// ==========================
+public List<Comentario> listarPorEvolucao(int idEvolucao) {
+
+    List<Comentario> lista = new ArrayList<>();
+
+    String sql =
+        "SELECT c.*, u.nome AS nomeUsuario " +
+        "FROM Comentarios c " +
+        "INNER JOIN usuarios u ON c.idUsuario = u.idUsuario " +
+        "WHERE c.idEvolucao = ? " +
+        "ORDER BY c.dataComentario ASC";
+
+    try (Connection conn = Conexao.conectar();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, idEvolucao);
+
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+
+            Comentario comentario = new Comentario();
+
+            comentario.setIdComentario(
+                rs.getInt("idComentario")
+            );
+
+            comentario.setIdEvolucao(
+                rs.getInt("idEvolucao")
+            );
+
+            comentario.setIdUsuario(
+                rs.getInt("idUsuario")
+            );
+
+            comentario.setComentario(
+                rs.getString("comentario")
+            );
+
+            comentario.setNomeUsuario(
+                rs.getString("nomeUsuario")
+            );
+
+            if (rs.getTimestamp("dataComentario") != null) {
+                comentario.setDataComentario(
+                    rs.getTimestamp("dataComentario")
+                .toLocalDateTime()
+                );
+            }
+
+            lista.add(comentario);
+        }
+
+    } catch (SQLException e) {
+
+        System.out.println("Erro ao listar comentários.");
+        e.printStackTrace();
+    }
+
+    return lista;
+}
+
 
     // ==========================
     // BUSCAR COMENTÁRIO

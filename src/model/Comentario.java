@@ -9,6 +9,7 @@ public class Comentario {
     private int idUsuario;
     private String comentario;
     private LocalDateTime dataComentario;
+    private String nomeUsuario;
 
     public int getIdComentario() {
         return idComentario;
@@ -46,7 +47,17 @@ public class Comentario {
         return dataComentario;
     }
 
+    public String getNomeUsuario() {
+    return nomeUsuario;
+    }
+
+public void setNomeUsuario(String nomeUsuario) {
+    this.nomeUsuario = nomeUsuario;
+    }
+
     public void setDataComentario(LocalDateTime dataComentario) {
         this.dataComentario = dataComentario;
     }
 }
+
+    

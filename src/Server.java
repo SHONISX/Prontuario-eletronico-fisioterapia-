@@ -1,5 +1,7 @@
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import dao.ComentarioDAO;
+import dao.EvolucaoDAO;
 import dao.PacienteDAO;
 import dao.UsuarioDAO;
 import java.io.IOException;
@@ -7,6 +9,8 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import model.Comentario;
+import model.Evolucao;
 import model.Paciente;
 import model.Usuario;
 
@@ -14,6 +18,8 @@ public class Server {
 
     static UsuarioDAO usuarioDAO = new UsuarioDAO();
     static PacienteDAO pacienteDAO = new PacienteDAO();
+    static EvolucaoDAO evolucaoDAO = new EvolucaoDAO();
+    static ComentarioDAO comentarioDAO = new ComentarioDAO();
 
     public static void main(String[] args) throws Exception {
 
@@ -75,10 +81,26 @@ public class Server {
 
                     System.out.println("Tentativa de login: " + email);
 
-                    boolean ok = usuarioDAO.login(email, senha);
+                    Usuario usuario = usuarioDAO.buscarUsuario(email, senha);
 
-                    sendResponse(exchange, ok ? "OK" : "ERRO");
-                    return;
+            if (usuario != null) {
+
+            String json =
+                    "{"
+                    + "\"status\":\"OK\","
+                    + "\"id\":" + usuario.getIdUsuario() + ","
+                    + "\"nome\":\"" + escapeJson(usuario.getNome()) + "\","
+                    + "\"tipo\":\"" + escapeJson(usuario.getTipo()) + "\""
+                    + "}";
+
+            sendResponse(exchange, json);
+
+            } else {
+
+    sendResponse(exchange, "{\"status\":\"ERRO\"}");
+}
+
+            return;
                 }
 
                 sendResponse(exchange, "INVALID_METHOD");
@@ -203,6 +225,149 @@ public class Server {
                 }
 
                 // =========================
+        // EVOLUÇÃO
+        // =========================
+        server.createContext("/evolucao", exchange -> {
+
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+
+                exchange.getResponseHeaders().set(
+                    "Access-Control-Allow-Origin", "*"
+                );
+
+                exchange.getResponseHeaders().set(
+                    "Access-Control-Allow-Methods",
+                    "GET, POST, OPTIONS"
+                );
+
+                exchange.getResponseHeaders().set(
+                    "Access-Control-Allow-Headers",
+                    "Content-Type"
+                );
+
+                exchange.sendResponseHeaders(204, -1);
+                exchange.close();
+                return;
+            }
+
+            try {
+
+                String method = exchange.getRequestMethod();
+                String query = exchange.getRequestURI().getQuery();
+
+        // =========================
+        // SALVAR EVOLUÇÃO
+        // =========================
+        if ("POST".equalsIgnoreCase(method)) {
+
+            String body = new String(
+                exchange.getRequestBody().readAllBytes(),
+                StandardCharsets.UTF_8
+            );
+
+            Evolucao evolucao = new Evolucao();
+
+            evolucao.setIdPaciente(
+                Integer.parseInt(extract(body, "idPaciente"))
+            );
+
+            evolucao.setIdUsuario(
+                Integer.parseInt(extract(body, "idUsuario"))
+            );
+
+            evolucao.setDescricao(
+                extract(body, "descricao")
+            );
+
+            boolean ok = evolucaoDAO.inserir(evolucao);
+
+            sendResponse(
+                exchange,
+                ok ? "OK" : "ERRO"
+            );
+
+            return;
+        }
+
+        // =========================
+        // LISTAR POR PACIENTE
+        // =========================
+        if ("GET".equalsIgnoreCase(method)
+                && query != null
+                && query.contains("idPaciente=")) {
+
+            int idPaciente = Integer.parseInt(
+                query.substring(
+                    query.indexOf("idPaciente=") + 11
+                )
+            );
+
+            List<Evolucao> lista =
+                evolucaoDAO.listarPorPaciente(idPaciente);
+
+            StringBuilder json =
+                new StringBuilder("[");
+
+            for (int i = 0; i < lista.size(); i++) {
+
+                Evolucao e = lista.get(i);
+
+                json.append("{")
+                    .append("\"idEvolucao\":")
+                    .append(e.getIdEvolucao())
+                    .append(",")
+
+                    .append("\"idPaciente\":")
+                    .append(e.getIdPaciente())
+                    .append(",")
+
+                    .append("\"idUsuario\":")
+                    .append(e.getIdUsuario())
+                    .append(",")
+
+                    .append("\"nomeUsuario\":\"")
+                    .append(escapeJson(e.getNomeUsuario()))
+                    .append("\",")
+
+                    .append("\"descricao\":\"")
+                    .append(escapeJson(e.getDescricao()))
+                    .append("\",")
+
+                    .append("\"data\":\"")
+                    .append(
+                        e.getData() != null
+                        ? e.getData().toString()
+                        : ""
+                    )
+                    .append("\"")
+
+                    .append("}");
+
+                if (i < lista.size() - 1) {
+                    json.append(",");
+                }
+            }
+
+            json.append("]");
+
+            sendResponse(exchange, json.toString());
+            return;
+        }
+
+        sendResponse(exchange, "INVALID_METHOD");
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        try {
+            sendResponse(exchange, "ERRO_INTERNO");
+        } catch (Exception ignored) {
+        }
+    }
+});
+                
+                // =========================
                 // LISTAR TODOS
                 // =========================
                 if ("GET".equalsIgnoreCase(method)) {
@@ -240,6 +405,164 @@ public class Server {
                     sendResponse(exchange, json.toString());
                     return;
                 }
+
+                // =========================
+            // COMENTÁRIO
+            // =========================
+            server.createContext("/comentario", exchange -> {
+
+                if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+
+                    exchange.getResponseHeaders().set(
+                        "Access-Control-Allow-Origin", "*"
+                    );
+
+                    exchange.getResponseHeaders().set(
+                        "Access-Control-Allow-Methods",
+                        "GET, POST, OPTIONS"
+                    );
+
+                    exchange.getResponseHeaders().set(
+                        "Access-Control-Allow-Headers",
+                        "Content-Type"
+                    );
+
+                    exchange.sendResponseHeaders(204, -1);
+                    exchange.close();
+                    return;
+                }
+
+                try {
+
+                    String method = exchange.getRequestMethod();
+                    String query = exchange.getRequestURI().getQuery();
+
+                    // =========================
+                    // SALVAR COMENTÁRIO
+                    // =========================
+                    if ("POST".equalsIgnoreCase(method)) {
+
+                        String body = new String(
+                            exchange.getRequestBody().readAllBytes(),
+                            StandardCharsets.UTF_8
+                        );
+
+                        Comentario comentario =
+                            new Comentario();
+
+                        comentario.setIdEvolucao(
+                            Integer.parseInt(
+                                extract(body, "idEvolucao")
+                            )
+                        );
+
+                        comentario.setIdUsuario(
+                            Integer.parseInt(
+                                extract(body, "idUsuario")
+                            )
+                        );
+
+                        comentario.setComentario(
+                            extract(body, "comentario")
+                        );
+
+                        boolean ok =
+                            comentarioDAO.inserir(comentario);
+
+                        sendResponse(
+                            exchange,
+                            ok ? "OK" : "ERRO"
+                        );
+
+                        return;
+                    }
+
+                    // =========================
+                    // LISTAR COMENTÁRIOS
+                    // =========================
+                    if ("GET".equalsIgnoreCase(method)
+                            && query != null
+                            && query.contains("idEvolucao=")) {
+
+                        int idEvolucao =
+                            Integer.parseInt(
+                                query.substring(
+                                    query.indexOf("idEvolucao=") + 11
+                                )
+                            );
+
+                        List<Comentario> lista =
+                            comentarioDAO.listarPorEvolucao(
+                                idEvolucao
+                            );
+
+                        StringBuilder json =
+                            new StringBuilder("[");
+
+                        for (int i = 0; i < lista.size(); i++) {
+
+                            Comentario c = lista.get(i);
+
+                            json.append("{")
+
+                                .append("\"idComentario\":")
+                                .append(c.getIdComentario())
+                                .append(",")
+
+                                .append("\"idEvolucao\":")
+                                .append(c.getIdEvolucao())
+                                .append(",")
+
+                                .append("\"nomeUsuario\":\"")
+                                .append(
+                                    escapeJson(
+                                        c.getNomeUsuario()
+                                    )
+                                )
+                                .append("\",")
+
+                                .append("\"comentario\":\"")
+                                .append(
+                                    escapeJson(
+                                        c.getComentario()
+                                    )
+                                )
+                                .append("\",")
+
+                                .append("\"data\":\"")
+                                .append(
+                                    c.getDataComentario() != null
+                                    ? c.getDataComentario().toString()
+                                    : ""
+                                )
+                                .append("\"")
+
+                                .append("}");
+
+                            if (i < lista.size() - 1) {
+                                json.append(",");
+                            }
+                        }
+
+                        json.append("]");
+
+                        sendResponse(exchange, json.toString());
+                        return;
+                    }
+
+                    sendResponse(exchange, "INVALID_METHOD");
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+
+                    try {
+                        sendResponse(exchange, "ERRO_INTERNO");
+                    } catch (Exception ignored) {
+                    }
+                }
+            });
+
 
                 // =========================
                 // SALVAR PACIENTE

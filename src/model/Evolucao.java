@@ -9,6 +9,7 @@ public class Evolucao {
     private int idUsuario;
     private String descricao;
     private LocalDateTime data;
+    private String nomeUsuario; // Adicionei o atributo nomeUsuario
 
     // ==========================
     // CONSTRUTORES
@@ -46,6 +47,14 @@ public class Evolucao {
     public void setIdPaciente(int idPaciente) {
         this.idPaciente = idPaciente;
     }
+
+    public String getNomeUsuario() {
+    return nomeUsuario;
+}
+
+public void setNomeUsuario(String nomeUsuario) {
+    this.nomeUsuario = nomeUsuario;
+}
 
     public int getIdUsuario() {
         return idUsuario;

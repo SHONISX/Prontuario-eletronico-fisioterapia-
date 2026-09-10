@@ -17,7 +17,7 @@ public class UsuarioDAO {
         String sql = "SELECT * FROM usuarios WHERE email = ? AND senha = ?";
 
         try (Connection conn = Conexao.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, email);
             stmt.setString(2, senha);
@@ -34,6 +34,44 @@ public class UsuarioDAO {
             return false;
         }
     }
+
+    // ==========================
+      // BUSCAR USUÁRIO NO LOGIN
+    // ==========================
+
+public Usuario buscarUsuario(String email, String senha) {
+
+    String sql = "SELECT * FROM usuarios WHERE email = ? AND senha = ?";
+
+    try (Connection conn = Conexao.conectar();
+    PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setString(1, email);
+        stmt.setString(2, senha);
+
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+
+            Usuario usuario = new Usuario();
+
+            usuario.setIdUsuario(rs.getInt("idUsuario"));
+            usuario.setNome(rs.getString("nome"));
+            usuario.setEmail(rs.getString("email"));
+            usuario.setTipo(rs.getString("tipo"));
+
+            return usuario;
+        }
+
+    } catch (SQLException e) {
+
+        System.out.println("Erro ao buscar usuário.");
+        e.printStackTrace();
+    }
+
+    return null;
+}
+
 
     // ==========================
     // CADASTRAR USUÁRIO
