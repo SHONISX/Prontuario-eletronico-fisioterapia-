@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import model.Paciente;
+import model.Usuario;
 
 public class Server {
 
@@ -92,6 +93,71 @@ public class Server {
                 }
             }
         });
+
+                // =========================
+                // USUÁRIO / COLABORADOR
+                // =========================
+            server.createContext("/usuario", exchange -> {
+
+             // CORS / preflight
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+
+        exchange.getResponseHeaders().set(
+                "Access-Control-Allow-Origin", "*"
+        );
+
+        exchange.getResponseHeaders().set(
+                "Access-Control-Allow-Methods", "GET, POST, OPTIONS"
+        );
+
+        exchange.getResponseHeaders().set(
+                "Access-Control-Allow-Headers", "Content-Type"
+        );
+
+        exchange.sendResponseHeaders(204, -1);
+        exchange.close();
+        return;
+            }
+
+            try {
+
+        String method = exchange.getRequestMethod();
+
+        // =========================
+        // CADASTRAR COLABORADOR
+        // =========================
+        if ("POST".equalsIgnoreCase(method)) {
+
+            String body = new String(
+                    exchange.getRequestBody().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
+
+            Usuario usuario = new Usuario();
+
+            usuario.setNome(extract(body, "nome"));
+            usuario.setEmail(extract(body, "email"));
+            usuario.setSenha(extract(body, "senha"));
+            usuario.setTipo(extract(body, "tipo"));
+
+            boolean ok = usuarioDAO.cadastrar(usuario);
+
+            sendResponse(exchange, ok ? "OK" : "ERRO");
+            return;
+        }
+
+        sendResponse(exchange, "INVALID_METHOD");
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        try {
+            sendResponse(exchange, "ERRO_INTERNO");
+        } catch (Exception ignored) {
+        }
+    }
+});
 
         // =========================
         // PACIENTE

@@ -80,6 +80,35 @@ button:hover {
         <button onclick="mostrarLista()">Listar Pacientes</button>
     </div>
 
+    <!-- CADASTRO DE COLABORADOR -->
+<div class="card">
+    <h3>Cadastrar Colaborador</h3>
+
+    <input id="usuarioNome" placeholder="Nome do colaborador">
+
+    <input
+        id="usuarioEmail"
+        type="email"
+        placeholder="E-mail"
+    >
+
+    <input
+        id="usuarioSenha"
+        type="password"
+        placeholder="Senha"
+    >
+
+    <select id="usuarioTipo">
+        <option value="Aluno">Aluno</option>
+        <option value="Professor">Professor</option>
+    </select>
+
+    <button onclick="cadastrarColaborador()">
+        Cadastrar Colaborador
+    </button>
+</div>
+
+
     <!-- PACIENTE SELECIONADO -->
     <div class="card">
         <h3>Paciente Selecionado</h3>
@@ -146,6 +175,58 @@ function login() {
 
     });
 }
+
+function cadastrarColaborador() {
+
+    let usuario = {
+        nome: document.getElementById("usuarioNome").value,
+        email: document.getElementById("usuarioEmail").value,
+        senha: document.getElementById("usuarioSenha").value,
+        tipo: document.getElementById("usuarioTipo").value
+    };
+
+    if (
+        usuario.nome === "" ||
+        usuario.email === "" ||
+        usuario.senha === ""
+    ) {
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+    fetch(
+        "https://prontuario-eletronico-fisioterapia-production.up.railway.app/usuario",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(usuario)
+        }
+    )
+    .then(res => res.text())
+    .then(res => {
+
+        if (res === "OK") {
+
+    alert("Colaborador cadastrado com sucesso!");
+
+    document.getElementById("usuarioNome").value = "";
+    document.getElementById("usuarioEmail").value = "";
+    document.getElementById("usuarioSenha").value = "";
+
+} else {
+
+    alert("Resposta do servidor: " + res);
+}
+    })
+    .catch(error => {
+
+        console.error(error);
+        alert("Erro de conexão com o servidor.");
+    });
+}
+
 
 function salvarPaciente() {
 
