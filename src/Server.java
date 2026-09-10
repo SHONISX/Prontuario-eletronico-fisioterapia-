@@ -40,6 +40,26 @@ public class Server {
         // =========================
         server.createContext("/login", exchange -> {
 
+            // Responde ao preflight CORS do navegador
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+
+            exchange.getResponseHeaders().set(
+            "Access-Control-Allow-Origin", "*"
+            );
+
+            exchange.getResponseHeaders().set(
+            "Access-Control-Allow-Methods", "GET, POST, OPTIONS"
+            );
+
+            exchange.getResponseHeaders().set(
+            "Access-Control-Allow-Headers", "Content-Type"
+            );
+
+            exchange.sendResponseHeaders(204, -1);
+            exchange.close();
+            return;
+            }
+
             try {
 
                 if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
