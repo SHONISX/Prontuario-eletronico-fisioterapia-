@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import model.Paciente;
 
 public class PacienteDAO {
@@ -16,10 +15,10 @@ public class PacienteDAO {
     // ==========================
     public boolean inserir(Paciente paciente) {
 
-        String sql = "INSERT INTO Pacientes(nome, idade, diagnostico, queixaPrincipal, objetivos, condutas) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO pacientes(nome, idade, diagnostico, queixaPrincipal, objetivos, condutas) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = Conexao.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+          PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, paciente.getNome());
             stmt.setInt(2, paciente.getIdade());
@@ -48,7 +47,7 @@ public class PacienteDAO {
 
         List<Paciente> lista = new ArrayList<>();
 
-        String sql = "SELECT * FROM Pacientes ORDER BY nome";
+        String sql = "SELECT * FROM pacientes ORDER BY nome";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -84,7 +83,7 @@ public class PacienteDAO {
     // ==========================
     public Paciente buscarPorId(int idPaciente) {
 
-        String sql = "SELECT * FROM Pacientes WHERE idPaciente = ?";
+        String sql = "SELECT * FROM pacientes WHERE idPaciente = ?";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -124,7 +123,7 @@ public class PacienteDAO {
     // ==========================
     public boolean atualizar(Paciente paciente) {
 
-        String sql = "UPDATE Pacientes SET nome=?, idade=?, diagnostico=?, queixaPrincipal=?, objetivos=?, condutas=? WHERE idPaciente=?";
+        String sql = "UPDATE pacientes SET nome=?, idade=?, diagnostico=?, queixaPrincipal=?, objetivos=?, condutas=? WHERE idPaciente=?";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -155,7 +154,7 @@ public class PacienteDAO {
     // ==========================
     public boolean excluir(int idPaciente) {
 
-        String sql = "DELETE FROM Pacientes WHERE idPaciente = ?";
+        String sql = "DELETE FROM pacientes WHERE idPaciente = ?";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

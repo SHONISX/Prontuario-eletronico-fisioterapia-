@@ -190,7 +190,7 @@ public class Server {
                     p.setNome(extract(body, "nome"));
                     p.setIdade(Integer.parseInt(extract(body, "idade")));
                     p.setDiagnostico(extract(body, "diagnostico"));
-                    p.setQueixaPrincipal(extract(body, "queixa"));
+                    p.setQueixaPrincipal(extract(body, "queixaPrincipal"));
                     p.setObjetivos(extract(body, "objetivos"));
                     p.setCondutas(extract(body, "condutas"));
 

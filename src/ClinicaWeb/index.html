@@ -127,7 +127,7 @@ function login() {
     let email = document.getElementById("email").value;
     let senha = document.getElementById("senha").value;
 
-    fetch("http://localhost:8080/login", {
+    fetch("https://prontuario-eletronico-fisioterapia-production.up.railway.app/login", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ email, senha })
@@ -158,7 +158,7 @@ function salvarPaciente() {
         condutas: document.getElementById("condutas").value
     };
 
-    fetch("http://localhost:8080/paciente", {
+    fetch("https://prontuario-eletronico-fisioterapia-production.up.railway.app/paciente", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(paciente)
@@ -172,7 +172,7 @@ function salvarPaciente() {
 
 function listarPacientes() {
 
-    fetch("http://localhost:8080/paciente")
+    fetch("https://prontuario-eletronico-fisioterapia-production.up.railway.app/paciente")
     .then(res => res.json())
     .then(data => {
 
@@ -214,7 +214,7 @@ function selecionarPorId(id) {
     document.getElementById("pacienteAtual").innerText =
         "Paciente selecionado ID: " + id;
 
-    fetch("http://localhost:8080/paciente?id=" + id)
+    fetch("https://prontuario-eletronico-fisioterapia-production.up.railway.app/paciente?id=" + id)
     .then(res => res.json())
     .then(p => {
 
