@@ -15,7 +15,7 @@ public class EvolucaoDAO {
     // ==========================
     public boolean inserir(Evolucao evolucao) {
 
-        String sql = "INSERT INTO Evolucoes(idPaciente, idUsuario, descricao) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO evolucoes(idPaciente, idUsuario, descricao) VALUES (?, ?, ?)";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -44,7 +44,7 @@ public class EvolucaoDAO {
 
         List<Evolucao> lista = new ArrayList<>();
 
-        String sql = "SELECT * FROM Evolucoes ORDER BY data DESC";
+        String sql = "SELECT * FROM evolucoes ORDER BY data DESC";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -82,7 +82,7 @@ public List<Evolucao> listarPorPaciente(int idPaciente) {
 
     String sql =
         "SELECT e.*, u.nome AS nomeUsuario " +
-        "FROM Evolucoes e " +
+        "FROM evolucoes e " +
         "INNER JOIN usuarios u ON e.idUsuario = u.idUsuario " +
         "WHERE e.idPaciente = ? " +
         "ORDER BY e.data DESC";
@@ -128,7 +128,7 @@ public List<Evolucao> listarPorPaciente(int idPaciente) {
     // ==========================
     public Evolucao buscarPorId(int idEvolucao) {
 
-        String sql = "SELECT * FROM Evolucoes WHERE idEvolucao = ?";
+        String sql = "SELECT * FROM evolucoes WHERE idEvolucao = ?";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -165,7 +165,7 @@ public List<Evolucao> listarPorPaciente(int idPaciente) {
     // ==========================
     public boolean atualizar(Evolucao evolucao) {
 
-        String sql = "UPDATE Evolucoes SET descricao=? WHERE idEvolucao=?";
+        String sql = "UPDATE evolucoes SET descricao=? WHERE idEvolucao=?";
 
         try (Connection conn = Conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -191,7 +191,7 @@ public List<Evolucao> listarPorPaciente(int idPaciente) {
     // ==========================
     public boolean excluir(int idEvolucao) {
 
-        String sql = "DELETE FROM Evolucoes WHERE idEvolucao = ?";
+        String sql = "DELETE FROM evolucoes WHERE idEvolucao = ?";
 
         try (Connection conn = Conexao.conectar();
         PreparedStatement stmt = conn.prepareStatement(sql)) {

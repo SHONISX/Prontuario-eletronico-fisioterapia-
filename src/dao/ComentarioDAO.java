@@ -15,7 +15,7 @@ public class ComentarioDAO {
     // ==========================
     public boolean inserir(Comentario comentario) {
 
-        String sql = "INSERT INTO Comentarios(idEvolucao, idUsuario, comentario) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO comentarios(idEvolucao, idUsuario, comentario) VALUES (?, ?, ?)";
 
         try (Connection conn = Conexao.conectar();
             PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -48,7 +48,7 @@ public List<Comentario> listarPorEvolucao(int idEvolucao) {
 
     String sql =
         "SELECT c.*, u.nome AS nomeUsuario " +
-        "FROM Comentarios c " +
+        "FROM comentarios c " +
         "INNER JOIN usuarios u ON c.idUsuario = u.idUsuario " +
         "WHERE c.idEvolucao = ? " +
         "ORDER BY c.dataComentario ASC";
@@ -109,7 +109,7 @@ public List<Comentario> listarPorEvolucao(int idEvolucao) {
     // ==========================
     public Comentario buscarPorId(int idComentario) {
 
-        String sql = "SELECT * FROM Comentarios WHERE idComentario = ?";
+        String sql = "SELECT * FROM comentarios WHERE idComentario = ?";
 
         try (Connection conn = Conexao.conectar();
             PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -147,7 +147,7 @@ public List<Comentario> listarPorEvolucao(int idEvolucao) {
     // ==========================
     public boolean atualizar(Comentario comentario) {
 
-        String sql = "UPDATE Comentarios SET comentario=? WHERE idComentario=?";
+        String sql = "UPDATE comentarios SET comentario=? WHERE idComentario=?";
 
         try (Connection conn = Conexao.conectar();
             PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -175,7 +175,7 @@ public List<Comentario> listarPorEvolucao(int idEvolucao) {
     // ==========================
     public boolean excluir(int idComentario) {
 
-        String sql = "DELETE FROM Comentarios WHERE idComentario = ?";
+        String sql = "DELETE FROM comentarios WHERE idComentario = ?";
 
         try (Connection conn = Conexao.conectar();
             PreparedStatement stmt = conn.prepareStatement(sql)) {

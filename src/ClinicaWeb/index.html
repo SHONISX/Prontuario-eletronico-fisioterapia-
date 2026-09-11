@@ -221,26 +221,23 @@ function salvarEvolucao() {
         }
     )
     .then(res => res.text())
-    .then(res => {
+.then(res => {
 
-        if (res === "OK") {
+    alert("Resposta do servidor: " + res);
 
-            alert("Evolução salva com sucesso!");
+    if (res === "OK") {
 
-            document.getElementById(
-                "evolucaoDescricao"
-            ).value = "";
+        document.getElementById("evolucaoDescricao").value = "";
 
-            listarEvolucoes();
+        listarEvolucoes();
+    }
+})
+.catch(error => {
 
-        } else {
+    console.error(error);
 
-            alert(
-                "Erro ao salvar evolução: " +
-                res
-            );
-        }
-    });
+    alert("Erro de conexão: " + error);
+});
 }
 
 function login() {
