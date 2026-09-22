@@ -1,18 +1,28 @@
-## Getting Started
+Trata-se do meu projeto de extensão onde optei por criar um sistema de cadastro e evolução de pacientes para uma clinica escola de fisioterapia.
+O Prontuário Eletrônico de Fisioterapia é um sistema web desenvolvido para facilitar o gerenciamento de pacientes em uma clínica de fisioterapia.
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
 
-## Folder Structure
+Tecnologias utilizadas
+Java — Back-end.
+HTML, CSS e JavaScript — Front-end.
+MySQL — Banco de dados.
+Railway — Hospedagem.
+GitHub — Versionamento do código.
 
-The workspace contains two folders by default, where:
+Funcionalidades
+Login de usuários.
+Cadastro de alunos e professores.
+Cadastro e pesquisa de pacientes por nome ou ID.
+Visualização dos prontuários.
+Registro de evoluções fisioterapêuticas.
+Comentários nas evoluções.
+Controle de permissões entre alunos e professores.
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+Como executar
+Baixe o projeto pelo GitHub.
+Abra o projeto no Visual Studio Code.
+Configure o banco de dados MySQL no arquivo Conexao.java.
+Instale o Java JDK e configure o driver JDBC do MySQL.
+Execute o servidor Java pelo arquivo Server.java.
+Abra o arquivo index.html no navegador utilizando o Live Server.
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
-
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
